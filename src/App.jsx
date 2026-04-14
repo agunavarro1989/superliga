@@ -783,10 +783,16 @@ const drawCanvasHeader = async (ctx, canvas, config) => {
 
 const drawCanvasBg = async (ctx, canvas, config, isExport = true) => {
    const useExportBgUrl = isExport && config.exportBgUrl !== undefined && config.exportBgUrl !== '';
-   const useExportBgColor = isExport && config.exportBgColor !== undefined && config.exportBgColor !== '';
-   
    const finalBgUrl = useExportBgUrl ? config.exportBgUrl : (config.exportWithBg !== false ? config.bgUrl : null);
-   const finalBgColor = useExportBgColor ? config.exportBgColor : config.bgColor;
+   
+   const overlayColor = isExport ? (config.exportOverlayColor || config.bgColor || '#020617') : (config.bgColor || '#020617');
+   
+   // NUEVO: Aquí capturamos la opacidad del selector (0 a 100) y la convertimos a decimal (0.0 a 1.0) para el RGBA
+   const overlayOpacity = isExport 
+        ? ((config.exportOverlayOpacity !== undefined) ? config.exportOverlayOpacity / 100 : 0.8) 
+        : ((config.bgOpacity !== undefined) ? config.bgOpacity / 100 : 0.85);
+   
+   const rgb = hexToRgb(overlayColor);
 
    if (finalBgUrl) {
       try {
@@ -813,16 +819,14 @@ const drawCanvasBg = async (ctx, canvas, config, isExport = true) => {
 
           ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
           
-          // Si sube un fondo export específico, aplicamos menos opacidad para que resalte más.
-          const opacity = useExportBgUrl ? '99' : 'E6'; 
-          ctx.fillStyle = finalBgColor ? finalBgColor + opacity : 'rgba(2, 6, 23, 0.9)'; 
+          ctx.fillStyle = `rgba(${rgb}, ${overlayOpacity})`; 
           ctx.fillRect(0, 0, canvas.width, canvas.height);
       } catch(e) {
-          ctx.fillStyle = finalBgColor || '#0f172a';
+          ctx.fillStyle = `rgba(${rgb}, 1)`;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
   } else {
-      ctx.fillStyle = finalBgColor || '#0f172a'; 
+      ctx.fillStyle = `rgba(${rgb}, 1)`; 
       ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 }
@@ -2963,7 +2967,37 @@ function AdminConfig({ config, db, getCollectionPath }) {
             <div className="lg:col-span-3 mt-6 pt-6 border-t border-white/10 space-y-6">
                 <div>
                    <h4 className="font-black text-lg theme-accent-text mb-2 flex items-center"><Download size={20} className="mr-2" /> Personalización de Carteles (Descargas / WhatsApp)</h4>
-                   <p className="text-xs opacity-60">Estos ajustes solo aplicarán para las imágenes que se exporten (Resultados, Llaves y Zonas).</p>
+                   {/* OVERLAY RGBA PARA CARTELES EXPORTADOS */}
+                  <div>
+                     <label className="text-sm font-bold opacity-80 mb-2 block">Color de Oscurecimiento (Overlay) y Transparencia</label>
+                     <p className="text-xs opacity-60 mb-3">Ajusta qué tan oscuro se verá el fondo en las imágenes descargadas. Si lo dejas transparente (0%), se verá solo la imagen limpia.</p>
+                     
+                     <div className="flex flex-col md:flex-row items-center gap-6 bg-black/40 p-4 rounded-xl border border-white/5">
+                        {/* Selector de Color */}
+                        <input 
+                           type="color" 
+                           value={form.exportOverlayColor || form.bgColor || '#020617'} 
+                           onChange={e=>setForm({...form, exportOverlayColor: e.target.value})} 
+                           className="w-16 h-16 bg-transparent border-none cursor-pointer rounded shrink-0" 
+                           title="Color Base Exportación" 
+                        />
+                        
+                        {/* Nueva Barra de Opacidad */}
+                        <div className="flex-1 w-full">
+                           <div className="flex justify-between text-[10px] font-black uppercase opacity-60 mb-2">
+                              <span>Transparente (0%)</span>
+                              <span>Sólido Oscuro ({form.exportOverlayOpacity ?? 85}%)</span>
+                           </div>
+                           <input 
+                              type="range" 
+                              min="0" max="100" 
+                              value={form.exportOverlayOpacity ?? 85} 
+                              onChange={e=>setForm({...form, exportOverlayOpacity: Number(e.target.value)})} 
+                              className="w-full accent-lime-500" 
+                           />
+                        </div>
+                     </div>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-black/40 p-6 rounded-2xl border border-white/5">
