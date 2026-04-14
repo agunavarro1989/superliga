@@ -337,6 +337,7 @@ export default function App() {
 
               <div className="md:hidden flex items-center space-x-2 shrink-0">
                 <button onClick={() => setActiveTab('inicio')} className={`p-2 rounded-lg ${activeTab === 'inicio' ? 'bg-white/10 theme-primary-text' : 'opacity-60'}`}><Trophy size={22} /></button>
+                <button onClick={() => setActiveTab('grilla')} className={`p-2 rounded-lg ${activeTab === 'grilla' ? 'bg-white/10 theme-primary-text' : 'opacity-60'}`}><CalendarDays size={22} /></button>
                 <button onClick={() => setActiveTab('torneos')} className={`p-2 rounded-lg ${activeTab === 'torneos' ? 'bg-white/10 theme-primary-text' : 'opacity-60'}`}><LayoutList size={22} /></button>
                 {config.feature_clubs !== false && <button onClick={() => setActiveTab('clubes')} className={`p-2 rounded-lg ${activeTab === 'clubes' ? 'bg-white/10 theme-primary-text' : 'opacity-60'}`}><MapPin size={22} /></button>}
                 <button onClick={() => setActiveTab('admin')} className={`p-2 rounded-lg ${activeTab === 'admin' ? 'bg-white/10 theme-primary-text' : 'opacity-60'}`}>
@@ -659,7 +660,6 @@ export default function App() {
                     <input type="password" placeholder="PIN de Acceso" value={adminPin} onChange={(e) => setAdminPin(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-4 focus:outline-none focus:theme-primary-border mb-2 text-center tracking-[0.5em] text-xl font-black shadow-inner theme-font-secondary" />
                     {loginError && <p className="text-red-400 text-xs font-bold text-center mb-4">{loginError}</p>}
                     <button type="submit" className="w-full theme-primary-bg font-black py-4 rounded-xl transition-all shadow-lg uppercase tracking-widest mt-2 hover:opacity-80 text-black">Ingresar al Panel</button>
-                    <p className="text-xs opacity-60 text-center mt-6">Demo Admin: <strong>{config.adminPin}</strong><br/>Demo Super: <strong>{config.superAdminPin}</strong></p>
                   </form>
                 </div>
               ) : (
